@@ -1,5 +1,6 @@
 import pool from "./database";
 import { Request, Response } from "express";
+import * as bcrypt from "bcryptjs";
 
 
 // Teste de conexão
@@ -25,10 +26,11 @@ export const getUsers = async (req: Request, res: Response) => {
 // Criar um novo usuário
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const { nome, email, cpf } = req.body;
+    const { nome, email, cpf, senha } = req.body;
+    const hashedPassword = await bcrypt.encodeBase64(senha, 10);
     const result = await pool.query(
-      "INSERT INTO usuarios (nome, email, cpf) VALUES ($1, $2, $3) RETURNING *",
-      [nome, email, cpf]
+      "INSERT INTO usuarios (nome, email, cpf, senha) VALUES ($1, $2, $3, $4) RETURNING *",
+      [nome, email, cpf, hashedPassword]
     );
     res.json(result.rows[0]);
   } catch (error) {

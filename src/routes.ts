@@ -5,6 +5,6 @@ const router = Router();
 
 router.get("/", testDB);
 router.get("/usuarios", getUsers);
-router.post("/usuarios", createUser);
+router.post("/register", createUser);
 
 export default router;
