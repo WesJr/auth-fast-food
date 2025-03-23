@@ -25,10 +25,10 @@ export const getUsers = async (req: Request, res: Response) => {
 // Criar um novo usuário
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const { nome, email } = req.body;
+    const { nome, email, cpf } = req.body;
     const result = await pool.query(
-      "INSERT INTO usuarios (nome, email) VALUES ($1, $2) RETURNING *",
-      [nome, email]
+      "INSERT INTO usuarios (nome, email, cpf) VALUES ($1, $2, $3) RETURNING *",
+      [nome, email, cpf]
     );
     res.json(result.rows[0]);
   } catch (error) {
