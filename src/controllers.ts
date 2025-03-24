@@ -6,7 +6,7 @@ import * as jwt from "jsonwebtoken";
 
 
 dotenv.config();
-console.log(process.env)
+
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
 // Teste de conexão
@@ -63,7 +63,7 @@ export const login = async (req: Request, res: Response) => {
     const token = jwt.sign({ userId: result.rows[0].id }, JWT_SECRET, { expiresIn: "1h" });
 
 
-    res.json(token);
+    res.json("Bearer: " + token);
     
   } catch (error) {
     res.status(500).json({ error: error.message });
