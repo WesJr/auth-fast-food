@@ -1,72 +1,60 @@
-import pool from "./database";
-import { Request, Response } from "express";
+import { APIGatewayProxyHandler } from 'aws-lambda';
 import * as bcrypt from "bcryptjs";
 import * as dotenv from 'dotenv';
 import * as jwt from "jsonwebtoken";
-
+import pool from "./database";
 
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
-// Teste de conexão
-export const testDB = async (req: Request, res: Response) => {
-  try {
-    const result = await pool.query("SELECT NOW()");
-    res.json({ message: "Banco conectado!", time: result.rows[0] });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// Buscar todos os usuários
-export const getUsers = async (req: Request, res: Response) => {
-  try {
-    const result = await pool.query("SELECT * FROM usuarios");
-    res.json(result.rows);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// Criar um novo usuário
-export const createUser = async (req: Request, res: Response) => {
-  try {
-    const { nome, email, cpf, senha } = req.body;
-    const hashedPassword = await bcrypt.hash(senha, 10);
-    const result = await pool.query(
-      "INSERT INTO usuarios (nome, email, cpf, senha) VALUES ($1, $2, $3, $4) RETURNING *",
-      [nome, email, cpf, hashedPassword]
-    );
-    res.json(result.rows[0]);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+export const healthCheck: APIGatewayProxyHandler = async (event) => {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: "Go Serverless v4! Your function executed successfully!",
+    }),
+  };
 };
 
 
-export const login = async (req: Request, res: Response) => {
+
+export const login: APIGatewayProxyHandler = async (event) => {
   try {
-    const { cpf , senha } = req.body;
+    const { cpf , senha } = JSON.parse(event.body);
 
     const result = await pool.query("SELECT * FROM usuarios WHERE cpf = $1 ",
           [cpf]
          );
-    console.log(JWT_SECRET)
 
-    if (result.rows.length === 0 ) {res.status(400).json({ message: "Usuário não encontrado" });}
+    if (result.rows.length === 0 ) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ message: "Usuário não encontrado" }),
+      };
+    }
 
     const isMatch = await bcrypt.compare(senha, result.rows[0].senha);
     
-    if (!isMatch) {res.status(400).json({ message: "Credenciais inválidas" });}
+    if (!isMatch) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({ message: "Credenciais inválidas" }),
+      }
+    }
 
     const token = jwt.sign({ userId: result.rows[0].id }, JWT_SECRET, { expiresIn: "1h" });
 
-
-    res.json("Bearer: " + token);
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ token }),
+    }
     
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Erro ao fazer login", error: error.message }),
+    }
   }
 };
 

@@ -1,10 +1,10 @@
 {
-  "name": "project",
+  "name": "auth-fast-food",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec ts-node src/server.ts"
+    "start": "serverless dev"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +22,7 @@
     "sequelize": "^6.37.6"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.108",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
@@ -30,6 +31,8 @@
     "@types/node": "^22.13.11",
     "@types/pg": "^8.11.11",
     "nodemon": "^3.1.9",
+    "serverless": "^4.6.2",
+    "serverless-offline": "^14.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   }
